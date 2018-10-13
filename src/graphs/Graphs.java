@@ -217,36 +217,99 @@ public class Graphs {
     public static Graph EdmondsKarp(Graph G, int s, int t) {
         checkVertex(G, s);
         checkVertex(G, t);
+        checkEqualSourceAndSink(s, t);
         checkNrEdgeVariables(G, 1);
         checkAntiParallelEdges(G);
         checkNonPositiveEdgeWeights(G);
 
-        if (s != t) {
-            G = makeFlowGraph(G);
-            Graph Gf = makeResidualGraph(G);
+        G = makeFlowGraph(G);
+        Graph Gf = makeResidualGraph(G);
 
-            int[] parents = BFS(Gf, s)[1];
+        int[] parents = BFS(Gf, s)[1];
+        while (parents[t] != -1) {
+            List<int[]> p = getPath(Gf, t, parents);
+            p.remove(0);
+            int pathResidualCapacity = getPathResidualCapacity(p);
+
+            int u = s;
+            for (int[] vars : p) {
+                int v = vars[0];
+                augmentFlow(G, Gf, u, v, pathResidualCapacity);
+
+                u = v;
+            }
+
+            parents = BFS(Gf, s)[1];
+        }
+
+        return G;
+    }
+
+    /**
+     *
+     * @param G
+     * @param s
+     * @param t
+     * @return
+     */
+    public static Graph capacityScaling(Graph G, int s, int t) {
+        checkVertex(G, s);
+        checkVertex(G, t);
+        checkEqualSourceAndSink(s, t);
+        checkNrEdgeVariables(G, 1);
+        checkAntiParallelEdges(G);
+        checkNonPositiveEdgeWeights(G);
+
+        int delta = largestPowerOf2SmallerEqual(getMaxCapacity(G));
+        G = makeFlowGraph(G);
+
+        while(delta >= 1) {
+            Graph GfDelta = makeResidualGraph(G, delta);
+
+            int[] parents = BFS(GfDelta, s)[1];
             while (parents[t] != -1) {
-                List<int[]> p = getPath(Gf, t, parents);
+                List<int[]> p = getPath(GfDelta, t, parents);
                 p.remove(0);
                 int pathResidualCapacity = getPathResidualCapacity(p);
 
                 int u = s;
                 for (int[] vars : p) {
                     int v = vars[0];
-                    augmentFlow(G, Gf, u, v, pathResidualCapacity);
+                    augmentFlow(G, GfDelta, u, v, pathResidualCapacity);
 
                     u = v;
                 }
 
-                parents = BFS(Gf, s)[1];
+                parents = BFS(GfDelta, s)[1];
             }
 
-            return G;
+            delta = delta / 2;
         }
 
-        throw new IllegalArgumentException("The source vertex is equal to the"
-                + " sink vertex");
+        return G;
+    }
+    
+    private static int largestPowerOf2SmallerEqual(int i) {
+        int powerOf2 = 1;
+        
+        while(i > powerOf2) {
+            powerOf2 = powerOf2 * 2;
+        }
+        
+        return i == powerOf2 ? i : powerOf2 / 2;
+    }
+
+    private static int getMaxCapacity(Graph G) {
+        int nrVertices = G.getNrVertices();
+
+        int maxCapacity = Integer.MIN_VALUE;
+        for(int u = 0; u < nrVertices; u++) {
+            for(int[] vars : G.getAdjList(u)) {
+                maxCapacity = Math.max(maxCapacity, vars[1]);
+            }
+        }
+
+        return maxCapacity == Integer.MIN_VALUE ? 1 : maxCapacity;
     }
 
     private static void augmentFlow(Graph G, Graph Gf, int u, int v,
@@ -297,7 +360,9 @@ public class Graphs {
      * vertex does not have a parent, the parent value of said vertex must be -1
      * @return a list of integer arrays. The first integer array is just the
      * first vertex of the path. The other integer arrays are the edges from the
-     * previous to the current vertex with edge variables.
+     * previous to the current vertex with edge variables. So [[first vertex],
+     * [second vertex] U [edge variables first edge], ... , [last vertex] U
+     * [edge variables last edge]].
      */
     public static List<int[]> getPath(Graph G, int s, int[] parents) {
         checkVertex(G, s);
@@ -320,7 +385,8 @@ public class Graphs {
 
         recursiveCalls++;
         if(recursiveCalls < G.getNrVertices()) {
-            List<int[]> p = getPathRecursive(G, parents[s], parents, recursiveCalls);
+            List<int[]> p = getPathRecursive(G, parents[s], parents,
+                    recursiveCalls);
             for (int[] vars : G.getAdjList(parents[s])) {
                 if (vars[0] == s) {
                     p.add(vars);
@@ -384,6 +450,10 @@ public class Graphs {
     }
 
     private static Graph makeResidualGraph(Graph G) {
+        return makeResidualGraph(G, 1);
+    }
+
+    private static Graph makeResidualGraph(Graph G, int delta) {
         int nrVertices = G.getNrVertices();
         Graph Gf = new Graph(nrVertices, 1);
         for (int u = 0; u < nrVertices; u++) {
@@ -391,16 +461,26 @@ public class Graphs {
                 int v = vars[0];
                 int f = vars[1];
                 int c = vars[2];
-                if (f != 0) {
-                    Gf.addEdge(v, u, f);
-                }
-                if (f != c) {
-                    Gf.addEdge(u, v, c - f);
+
+                if(c >= delta) {
+                    if (f != 0) {
+                        Gf.addEdge(v, u, f);
+                    }
+                    if (f != c) {
+                        Gf.addEdge(u, v, c - f);
+                    }
                 }
             }
         }
 
         return Gf;
+    }
+
+    private static void checkEqualSourceAndSink(int s, int t) {
+        if(s == t) {
+            throw new IllegalArgumentException("The source vertex is equal to "
+                    + "the sink vertex");
+        }
     }
 
     private static void checkVertex(Graph G, int u) {
