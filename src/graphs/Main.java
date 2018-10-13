@@ -6,9 +6,7 @@ package graphs;
  */
 public class Main {
     public static void main(String[] args) {
-        Graph G = new Graph(2);
-
-        G.addEdge(0, 1);
+        testEdmondsKarp();
     }
 
     public static void testEdmondsKarp() {
