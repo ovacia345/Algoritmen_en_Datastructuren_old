@@ -113,7 +113,7 @@ public class Graphs {
      * a negative-weight cycle. output[2] is the parent array
      */
     public static int[][] BellmanFord(Graph G, int s) {
-        checkNrEdgeVars(G, 1);
+        checkNrEdgeVariables(G, 1);
         int nrVertices = G.getNrVertices();
         int[] ds = new int[nrVertices];
         int[] parents = new int[nrVertices];
@@ -157,7 +157,7 @@ public class Graphs {
      * the parent array
      */
     public static int[][] Dijkstra(Graph G, int s) {
-        checkNrEdgeVars(G, 1);
+        checkNrEdgeVariables(G, 1);
         checkNonPositiveEdgeWeights(G);
         int nrVertices = G.getNrVertices();
         int[] ds = new int[nrVertices];
@@ -209,7 +209,7 @@ public class Graphs {
     /**
      * Edmonds-Karp's run on G with source s and sink t and outputs the
      * maximum flow graph
-     * @param G the input graph with only  positive capacities specified
+     * @param G the input graph with only positive capacities specified
      * @param s the source vertex
      * @param t the sink vertex
      * @return the maximum flow graph as computed by Edmonds-Karp
@@ -217,31 +217,36 @@ public class Graphs {
     public static Graph EdmondsKarp(Graph G, int s, int t) {
         checkVertex(G, s);
         checkVertex(G, t);
-        checkNrEdgeVars(G, 1);
+        checkNrEdgeVariables(G, 1);
         checkAntiParallelEdges(G);
         checkNonPositiveEdgeWeights(G);
 
-        G = makeFlowGraph(G);
-        Graph Gf = makeResidualGraph(G);
+        if (s != t) {
+            G = makeFlowGraph(G);
+            Graph Gf = makeResidualGraph(G);
 
-        int[] parents = BFS(Gf, s)[1];
-        while (parents[t] != -1) {
-            List<int[]> p = getPath(Gf, t, parents);
-            p.remove(0);
-            int pathResidualCapacity = getPathResidualCapacity(p);
+            int[] parents = BFS(Gf, s)[1];
+            while (parents[t] != -1) {
+                List<int[]> p = getPath(Gf, t, parents);
+                p.remove(0);
+                int pathResidualCapacity = getPathResidualCapacity(p);
 
-            int u = s;
-            for (int[] vars : p) {
-                int v = vars[0];
-                augmentFlow(G, Gf, u, v, pathResidualCapacity);
+                int u = s;
+                for (int[] vars : p) {
+                    int v = vars[0];
+                    augmentFlow(G, Gf, u, v, pathResidualCapacity);
 
-                u = v;
+                    u = v;
+                }
+
+                parents = BFS(Gf, s)[1];
             }
 
-            parents = BFS(Gf, s)[1];
+            return G;
         }
 
-        return G;
+        throw new IllegalArgumentException("The source vertex is equal to the"
+                + " sink vertex");
     }
 
     private static void augmentFlow(Graph G, Graph Gf, int u, int v,
@@ -250,7 +255,7 @@ public class Graphs {
             int[] vars = G.getEdgeVariables(u, v);
             int oldF = vars[0];
             int c = vars[1];
-            if(oldF == 0) {
+            if (oldF == 0) {
                 Gf.addEdge(v, u, 0);
             }
 
@@ -267,14 +272,14 @@ public class Graphs {
             int[] vars = G.getEdgeVariables(v, u);
             int oldF = vars[0];
             int c = vars[1];
-            if(oldF == c) {
+            if (oldF == c) {
                 Gf.addEdge(v, u, 0);
             }
 
             int newF = oldF - pathResidualCapacity;
             G.setEdgeVariable(v, u, 1, newF);
 
-            if(newF == 0) {
+            if (newF == 0) {
                 Gf.removeEdge(u, v);
             } else {
                 Gf.setEdgeVariable(u, v, 1, newF);
@@ -302,22 +307,29 @@ public class Graphs {
             }
         }
 
-        return getPathRecursive(G, s, parents);
+        return getPathRecursive(G, s, parents, 0);
     }
 
-    private static List<int[]> getPathRecursive(Graph G, int s, int[] parents) {
+    private static List<int[]> getPathRecursive(Graph G, int s, int[] parents,
+            int recursiveCalls) {
         if (parents[s] == -1) {
             List<int[]> p = new LinkedList<>();
             p.add(new int[]{s});
             return p;
         }
-        List<int[]> p = getPathRecursive(G, parents[s], parents);
-        for (int[] vars : G.getAdjList(parents[s])) {
-            if (vars[0] == s) {
-                p.add(vars);
+
+        recursiveCalls++;
+        if(recursiveCalls < G.getNrVertices()) {
+            List<int[]> p = getPathRecursive(G, parents[s], parents, recursiveCalls);
+            for (int[] vars : G.getAdjList(parents[s])) {
+                if (vars[0] == s) {
+                    p.add(vars);
+                }
             }
+            return p;
         }
-        return p;
+
+        throw new IllegalArgumentException("A cycle has been detected");
     }
 
     /**
@@ -394,16 +406,16 @@ public class Graphs {
     private static void checkVertex(Graph G, int u) {
         int nrVertices = G.getNrVertices();
         if (u < 0 || u >= nrVertices) {
-            throw new IllegalArgumentException(
-                    "The argument vertex is not a vertex in the graph");
+            throw new IllegalArgumentException(String.format(
+                    "Vertex %d is not a vertex in the graph", u));
         }
     }
 
-    private static void checkNrEdgeVars(Graph G, int nrEdgeVars) {
-        if (G.getNrEdgeVariables() != nrEdgeVars) {
+    private static void checkNrEdgeVariables(Graph G, int nrEdgeVariables) {
+        if (G.getNrEdgeVariables() != nrEdgeVariables) {
             throw new IllegalArgumentException(String.format("There should be "
                     + "%d edge variable(s), but there is/are %d edge variable(s)",
-                    nrEdgeVars, G.getNrEdgeVariables()));
+                    nrEdgeVariables, G.getNrEdgeVariables()));
         }
     }
 
