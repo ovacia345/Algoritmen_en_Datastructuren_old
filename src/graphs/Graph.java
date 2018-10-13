@@ -10,29 +10,27 @@ import java.util.List;
  */
 public class Graph {
     private final int nrVertices;
-    private final int nrEdgeVars;
+    private final int nrEdgeVariables;
     private final List<int[]>[] adjLists;
 
     /**
-     * Initializes graph with nrEdgeVars edge variables and nrVertices vertices
+     * Initializes graph with nrEdgeVariables edge variables and nrVertices vertices
      * @param nrVertices number of vertices
      * @param nrEdgeVars number of edge variables
      */
     public Graph(int nrVertices, int nrEdgeVars) {
-        if(nrVertices >= 0 && nrEdgeVars >= 0) {
+        if (nrVertices >= 0 && nrEdgeVars >= 0) {
             this.nrVertices = nrVertices;
-            this.nrEdgeVars = nrEdgeVars;
+            this.nrEdgeVariables = nrEdgeVars;
 
             adjLists = new List[nrVertices];
             for (int u = 0; u < nrVertices; u++) {
                 adjLists[u] = new LinkedList<>();
             }
-
-            return;
-        }
-
-        throw new IllegalArgumentException("Cannot have a negative number of "
+        } else {
+            throw new IllegalArgumentException("Cannot have a negative number of "
                 + "vertices/edge variables.");
+        }
     }
 
     /**
@@ -50,7 +48,7 @@ public class Graph {
      * @param vars integer array of [destination vertex] U [edge variables]
      */
     public void addEdge(int src, int... vars) {
-        checkNrEdgeVars(vars.length - 1);
+        checkNrEdgeVariables(vars.length - 1);
         checkHasNotEdge(src, vars[0]);
         checkVertex(vars[0]);
 
@@ -66,7 +64,7 @@ public class Graph {
      * [destination vertex] U [new edge variables]
      */
     public void setEdgeVariables(int src, int... newVars) {
-        checkNrEdgeVars(newVars.length - 1);
+        checkNrEdgeVariables(newVars.length - 1);
 
         List<int[]> adjList = getAdjList(src);
         for (int i = 0; i < adjList.size(); i++) {
@@ -84,21 +82,21 @@ public class Graph {
 
     /**
      * Change a single already existing edge's variable with src as source,
-     * dest as destination, var as edge variable number and value as
-     * the new value to be assigned to the edge variable
+ dest as destination, edgeVariableNr as edge variable number and value as
+ the new value to be assigned to the edge variable
      * @param src source vertex
      * @param dest destination vertex
-     * @param var edge variable number. Must be in [1,nrEdgeVars]
-     * @param value the new value of edge variable var
+     * @param edgeVariableNr edge variable number. Must be in [1,nrEdgeVariables]
+     * @param value the new value of edge variable edgeVariableNr
      */
-    public void setEdgeVariable(int src, int dest, int var, int value) {
-        checkEdgeVarNr(var);
+    public void setEdgeVariable(int src, int dest, int edgeVariableNr, int value) {
+        checkEdgeVariableNr(edgeVariableNr);
 
         List<int[]> adjList = getAdjList(src);
         for (int i = 0; i < adjList.size(); i++) {
             int[] vars = adjList.get(i);
             if (vars[0] == dest) {
-                vars[var] = value;
+                vars[edgeVariableNr] = value;
                 return;
             }
         }
@@ -145,16 +143,16 @@ public class Graph {
     }
 
     /**
-     * Gets edge variable var of edge (src, dest)
+     * Gets edge variable edgeVariableNr of edge (src, dest)
      * @param src source vertex
      * @param dest destination vertex
-     * @param var edge variable number. Must be in [1,nrEdgeVars]
-     * @return edge variable var of edge (src, dest) if it exists
+     * @param edgeVariableNr edge variable number. Must be in [1,nrEdgeVariables]
+     * @return edge variable edgeVariableNr of edge (src, dest) if it exists
      */
-    public int getEdgeVariable(int src, int dest, int var) {
-        checkEdgeVarNr(var);
+    public int getEdgeVariable(int src, int dest, int edgeVariableNr) {
+        checkEdgeVariableNr(edgeVariableNr);
 
-        return getEdgeVariables(src, dest)[var - 1];
+        return getEdgeVariables(src, dest)[edgeVariableNr - 1];
     }
 
     /**
@@ -188,7 +186,7 @@ public class Graph {
      * @return number of edge variables
      */
     public int getNrEdgeVariables() {
-        return nrEdgeVars;
+        return nrEdgeVariables;
     }
 
     /**
@@ -211,8 +209,8 @@ public class Graph {
 
     private void checkVertex(int u) {
         if (u < 0 || u >= nrVertices) {
-            throw new IllegalArgumentException(
-                    "The argument vertex is not a vertex in the graph");
+            throw new IllegalArgumentException(String.format(
+                    "Vertex %d is not a vertex in the graph", u));
         }
     }
 
@@ -223,25 +221,25 @@ public class Graph {
         }
     }
 
-    private void checkNrEdgeVars(int nrEdgeVars) {
-        if (this.nrEdgeVars != nrEdgeVars) {
+    private void checkNrEdgeVariables(int nrEdgeVariables) {
+        if (this.nrEdgeVariables != nrEdgeVariables) {
             throw new IllegalArgumentException(String.format("There should be "
                     + "%d edge variable(s), but there is/are %d edge variable(s)",
-                    this.nrEdgeVars, nrEdgeVars));
+                    this.nrEdgeVariables, nrEdgeVariables));
         }
     }
 
-    private void checkEdgeVarNr(int edgeVarNr) {
-        if (edgeVarNr > nrEdgeVars) {
+    private void checkEdgeVariableNr(int edgeVariableNr) {
+        if (edgeVariableNr > nrEdgeVariables) {
             throw new IllegalArgumentException(String.format("Edge variable "
                     + "%d does not exist, because there is/are only %d edge "
-                    + "variable(s).", edgeVarNr, nrEdgeVars));
+                    + "variable(s).", edgeVariableNr, nrEdgeVariables));
         }
-        if (edgeVarNr == 0) {
+        if (edgeVariableNr == 0) {
             throw new IllegalArgumentException("Edge variable 0 is the "
                     + "destination vertex and so not an edge variable.");
         }
-        if (edgeVarNr < 0) {
+        if (edgeVariableNr < 0) {
             throw new IllegalArgumentException("Negative edge variable number.");
         }
     }
@@ -249,7 +247,7 @@ public class Graph {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        if (nrEdgeVars == 0) {
+        if (nrEdgeVariables == 0) {
             for (int u = 0; u < nrVertices; u++) {
                 for (int[] vars : getAdjList(u)) {
                     sb.append(String.format("%d - %d\n", u, vars[0]));
@@ -259,10 +257,10 @@ public class Graph {
             for (int u = 0; u < nrVertices; u++) {
                 for (int[] vars : getAdjList(u)) {
                     sb.append(String.format("%d - %d:\t", u, vars[0]));
-                    for (int var = 1; var < nrEdgeVars; var++) {
+                    for (int var = 1; var < nrEdgeVariables; var++) {
                         sb.append(String.format("%d\t", vars[var]));
                     }
-                    sb.append(String.format("%d\n", vars[nrEdgeVars]));
+                    sb.append(String.format("%d\n", vars[nrEdgeVariables]));
                 }
             }
         }

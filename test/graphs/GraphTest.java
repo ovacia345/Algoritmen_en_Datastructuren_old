@@ -26,6 +26,32 @@ public class GraphTest {
 
 
     @Test
+    public void testInitializeGraphNegativeNrOfVertices() {
+        exception.expect(IllegalArgumentException.class);
+        exception.expectMessage("Cannot have a negative number of "
+                + "vertices/edge variables.");
+
+        Graph G = new Graph(-1);
+    }
+
+    @Test
+    public void testInitializeGraphNegativeNrOfEdgeVariables() {
+        exception.expect(IllegalArgumentException.class);
+        exception.expectMessage("Cannot have a negative number of "
+                + "vertices/edge variables.");
+
+        Graph G = new Graph(2, -1);
+    }
+
+    @Test
+    public void testInitializeGraph() {
+        Graph G = new Graph(2);
+
+        assertEquals(0, G.getNrEdgeVariables());
+    }
+
+
+    @Test
     public void testAddExistingEdge() {
         exception.expect(IllegalArgumentException.class);
         exception.expectMessage("Edge (0, 1) already exists in the graph.");
@@ -48,8 +74,7 @@ public class GraphTest {
     @Test
     public void testAddEdgeWithNonExistingVertex() {
         exception.expect(IllegalArgumentException.class);
-        exception.expectMessage("The argument vertex is not a vertex in the "
-                + "graph");
+        exception.expectMessage("Vertex 2 is not a vertex in the graph");
 
         Graph G = new Graph(2);
         G.addEdge(1, 2);
@@ -268,7 +293,7 @@ public class GraphTest {
     @Test
     public void testGetNonExistingAdjList() {
         exception.expect(IllegalArgumentException.class);
-        exception.expectMessage("The argument vertex is not a vertex in the graph");
+        exception.expectMessage("Vertex 2 is not a vertex in the graph");
 
         Graph G = new Graph(2);
         List<int[]> adjList = G.getAdjList(2);
@@ -326,7 +351,7 @@ public class GraphTest {
         Graph G1 = new Graph(2, 1);
         Graph G2 = new Graph(2, 2);
 
-        assertTrue(G1.equals(G2));
+        assertEquals(G1, G2);
     }
 
     @Test
@@ -368,6 +393,6 @@ public class GraphTest {
         G2.addEdge(0, 2, 3);
         G2.addEdge(2, 0, 4);
 
-        assertTrue(G1.equals(G2));
+        assertEquals(G1, G2);
     }
 }
