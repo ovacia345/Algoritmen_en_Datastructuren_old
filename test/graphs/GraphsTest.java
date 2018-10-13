@@ -319,21 +319,29 @@ public class GraphsTest {
 
     @Test
     public void testEdmondsKarp() {
-        Graph G = new Graph(4, 1);
-        G.addEdge(0, 1, 3);
-        G.addEdge(0, 2, 2);
-        G.addEdge(1, 2, 2);
-        G.addEdge(1, 3, 2);
-        G.addEdge(2, 3, 3);
+        Graph G = new Graph(8, 1);
+        G.addEdge(0, 1, 10);
+        G.addEdge(0, 4, 10);
+        G.addEdge(1, 2, 10);
+        G.addEdge(2, 3, 10);
+        G.addEdge(3, 7, 10);
+        G.addEdge(4, 3, 1);
+        G.addEdge(4, 5, 10);
+        G.addEdge(5, 6, 10);
+        G.addEdge(6, 7, 10);
 
-        Graph result = Graphs.EdmondsKarp(G, 0, 3);
+        Graph result = Graphs.EdmondsKarp(G, 0, 7);
 
-        Graph expectedResult = new Graph(4, 2);
-        expectedResult.addEdge(0, 1, 3, 3);
-        expectedResult.addEdge(0, 2, 2, 2);
-        expectedResult.addEdge(1, 2, 1, 2);
-        expectedResult.addEdge(1, 3, 2, 2);
-        expectedResult.addEdge(2, 3, 3, 3);
+        Graph expectedResult = new Graph(8, 2);
+        expectedResult.addEdge(0, 1, 10, 10);
+        expectedResult.addEdge(0, 4, 10, 10);
+        expectedResult.addEdge(1, 2, 10, 10);
+        expectedResult.addEdge(2, 3, 10, 10);
+        expectedResult.addEdge(3, 7, 10, 10);
+        expectedResult.addEdge(4, 3, 0, 1);
+        expectedResult.addEdge(4, 5, 10, 10);
+        expectedResult.addEdge(5, 6, 10, 10);
+        expectedResult.addEdge(6, 7, 10, 10);
 
         assertEquals(result, expectedResult);
     }
@@ -439,5 +447,126 @@ public class GraphsTest {
         GTransposedExpectedResult.addEdge(2, 1, 9, 10);
 
         assertEquals(GTransposedResult, GTransposedExpectedResult);
+    }
+
+
+    @Test
+    public void testCapacityScalingTooManyEdgeVariables() {
+        exception.expect(IllegalArgumentException.class);
+        exception.expectMessage("There should be 1 edge variable(s), "
+                + "but there is/are 2 edge variable(s)");
+
+        Graph G = new Graph(2, 2);
+        Graph GStar = Graphs.capacityScaling(G, 0, 1);
+    }
+
+    @Test
+    public void testCapacityScalingTooFewEdgeVariables() {
+        exception.expect(IllegalArgumentException.class);
+        exception.expectMessage("There should be 1 edge variable(s), "
+                + "but there is/are 0 edge variable(s)");
+
+        Graph G = new Graph(2);
+        Graph GStar = Graphs.capacityScaling(G, 0, 1);
+    }
+
+    @Test
+    public void testCapacityScalingNonExistingVertex1() {
+        exception.expect(IllegalArgumentException.class);
+        exception.expectMessage("Vertex 2 is not a vertex in the graph");
+
+        Graph G = new Graph(2, 1);
+        Graph GStar = Graphs.capacityScaling(G, 2, 1);
+    }
+
+    @Test
+    public void testCapacityScalingNonExistingVertex2() {
+        exception.expect(IllegalArgumentException.class);
+        exception.expectMessage("Vertex 2 is not a vertex in the graph");
+
+        Graph G = new Graph(2, 1);
+        Graph GStar = Graphs.capacityScaling(G, 1, 2);
+    }
+
+    @Test
+    public void testCapacityScalingEqualSourceSink() {
+        exception.expect(IllegalArgumentException.class);
+        exception.expectMessage("The source vertex is equal to the"
+                + " sink vertex");
+
+        Graph G = new Graph(2, 1);
+        Graph GStar = Graphs.capacityScaling(G, 0, 0);
+    }
+
+    @Test
+    public void testCapacityScalingNegativeEdgeWeights() {
+        exception.expect(IllegalArgumentException.class);
+        exception.expectMessage("Non-positive edge weights are not allowed.");
+
+        Graph G = new Graph(2, 1);
+        G.addEdge(0, 1, -1);
+
+        Graph GStar = Graphs.capacityScaling(G, 0, 1);
+    }
+
+    @Test
+    public void testCapacityScalingZeroEdgeWeights() {
+        exception.expect(IllegalArgumentException.class);
+        exception.expectMessage("Non-positive edge weights are not allowed.");
+
+        Graph G = new Graph(2, 1);
+        G.addEdge(0, 1, 0);
+
+        Graph GStar = Graphs.capacityScaling(G, 0, 1);
+    }
+
+    @Test
+    public void testCapacityScalingAntiParallelEdges() {
+        exception.expect(IllegalArgumentException.class);
+        exception.expectMessage("The input graph in a Ford-Fulkerson method "
+                + "cannot have anti-parallel edges");
+
+        Graph G = new Graph(2, 1);
+        G.addEdge(0, 1, 2);
+        G.addEdge(1, 0, 1);
+
+        Graph GStar = Graphs.capacityScaling(G, 0, 1);
+    }
+
+    @Test
+    public void testCapacityScalingNoEdges() {
+        Graph G = new Graph(3, 1);
+        Graph GStar = Graphs.capacityScaling(G, 0, 2);
+
+        assertEquals(G, GStar);
+    }
+
+    @Test
+    public void testCapacityScaling() {
+        Graph G = new Graph(8, 1);
+        G.addEdge(0, 1, 10);
+        G.addEdge(0, 4, 10);
+        G.addEdge(1, 2, 10);
+        G.addEdge(2, 3, 10);
+        G.addEdge(3, 7, 10);
+        G.addEdge(4, 3, 1);
+        G.addEdge(4, 5, 10);
+        G.addEdge(5, 6, 10);
+        G.addEdge(6, 7, 10);
+
+        Graph result = Graphs.capacityScaling(G, 0, 7);
+
+        Graph expectedResult = new Graph(8, 2);
+        expectedResult.addEdge(0, 1, 10, 10);
+        expectedResult.addEdge(0, 4, 10, 10);
+        expectedResult.addEdge(1, 2, 10, 10);
+        expectedResult.addEdge(2, 3, 10, 10);
+        expectedResult.addEdge(3, 7, 10, 10);
+        expectedResult.addEdge(4, 3, 0, 1);
+        expectedResult.addEdge(4, 5, 10, 10);
+        expectedResult.addEdge(5, 6, 10, 10);
+        expectedResult.addEdge(6, 7, 10, 10);
+
+        assertEquals(result, expectedResult);
     }
 }
