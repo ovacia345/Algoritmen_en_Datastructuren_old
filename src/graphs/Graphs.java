@@ -246,11 +246,13 @@ public class Graphs {
     }
 
     /**
-     *
-     * @param G
-     * @param s
-     * @param t
-     * @return
+     * Capacity scaling run on G with source s and sink t and outputs the
+     * maximum flow graph
+     * @param G the input graph with only positive capacities specified
+     * @param s the source vertex
+     * @param t the sink vertex
+     * @return the maximum flow graph as computed by the capacity scaling
+     * algorithm
      */
     public static Graph capacityScaling(Graph G, int s, int t) {
         checkVertex(G, s);
