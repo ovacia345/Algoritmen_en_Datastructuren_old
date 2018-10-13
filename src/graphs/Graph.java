@@ -16,20 +16,24 @@ public class Graph {
     /**
      * Initializes graph with nrEdgeVariables edge variables and nrVertices vertices
      * @param nrVertices number of vertices
-     * @param nrEdgeVars number of edge variables
+     * @param nrEdgeVariables number of edge variables
      */
-    public Graph(int nrVertices, int nrEdgeVars) {
-        if (nrVertices >= 0 && nrEdgeVars >= 0) {
-            this.nrVertices = nrVertices;
-            this.nrEdgeVariables = nrEdgeVars;
+    public Graph(int nrVertices, int nrEdgeVariables) {
+        if (nrVertices < 0) {
+            throw new IllegalArgumentException("Cannot have a negative number "
+                    + "of vertices.");
+        }
+        if(nrEdgeVariables < 0) {
+            throw new IllegalArgumentException("Cannot have a negative number "
+                    + "of edge variables.");
+        }
 
-            adjLists = new List[nrVertices];
-            for (int u = 0; u < nrVertices; u++) {
-                adjLists[u] = new LinkedList<>();
-            }
-        } else {
-            throw new IllegalArgumentException("Cannot have a negative number of "
-                + "vertices/edge variables.");
+        this.nrVertices = nrVertices;
+        this.nrEdgeVariables = nrEdgeVariables;
+
+        adjLists = new List[nrVertices];
+        for (int u = 0; u < nrVertices; u++) {
+            adjLists[u] = new LinkedList<>();
         }
     }
 

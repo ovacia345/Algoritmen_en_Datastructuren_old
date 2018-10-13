@@ -29,7 +29,7 @@ public class GraphTest {
     public void testInitializeGraphNegativeNrOfVertices() {
         exception.expect(IllegalArgumentException.class);
         exception.expectMessage("Cannot have a negative number of "
-                + "vertices/edge variables.");
+                + "vertices.");
 
         Graph G = new Graph(-1);
     }
@@ -38,7 +38,7 @@ public class GraphTest {
     public void testInitializeGraphNegativeNrOfEdgeVariables() {
         exception.expect(IllegalArgumentException.class);
         exception.expectMessage("Cannot have a negative number of "
-                + "vertices/edge variables.");
+                + "edge variables.");
 
         Graph G = new Graph(2, -1);
     }
@@ -62,7 +62,7 @@ public class GraphTest {
     }
 
     @Test
-    public void testAddEdgeWithWrongNrOfEdgeVars() {
+    public void testAddEdgeWithWrongNrOfEdgeVariables() {
         exception.expect(IllegalArgumentException.class);
         exception.expectMessage("There should be 0 edge variable(s), but there"
                 + " is/are 1 edge variable(s)");

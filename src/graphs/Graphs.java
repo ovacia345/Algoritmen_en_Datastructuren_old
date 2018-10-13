@@ -407,15 +407,15 @@ public class Graphs {
      */
     public static Graph transpose(Graph G) {
         int nrVertices = G.getNrVertices();
-        int nrEdgeVars = G.getNrEdgeVariables();
-        Graph GT = new Graph(nrVertices, nrEdgeVars);
+        int nrEdgeVariables = G.getNrEdgeVariables();
+        Graph GT = new Graph(nrVertices, nrEdgeVariables);
         for (int u = 0; u < nrVertices; u++) {
             for (int[] vars : G.getAdjList(u)) {
                 int v = vars[0];
 
-                int[] transposedVars = new int[nrEdgeVars + 1];
+                int[] transposedVars = new int[nrEdgeVariables + 1];
                 transposedVars[0] = u;
-                for (int i = 1; i <= nrEdgeVars; i++) {
+                for (int i = 1; i <= nrEdgeVariables; i++) {
                     transposedVars[i] = vars[i];
                 }
 
